@@ -10,6 +10,8 @@ Features:
 
 Note that on macOS there does not appear to be an API for getting key names from scancodes, so there is instead a hard-coded table based on the US QWERTY layout. This isn't ideal, but at least it's something.
 
+Run `cargo run --example all_keys` to see the key names produced by this library.
+
 ## Modifier names and order
 
 | OS      | Modifier names and order          |
