@@ -1,8 +1,28 @@
 [package]
-name = "keybinds"
+authors = ["HactarCE"]
+description = "Platform-aware keyboard scancode handling for Rust applications"
+repository = "https://github.com/HactarCE/scancode-convert-rs"
+license = "MIT OR Apache-2.0"
+categories = ["game-development", "gui", "internationalization", "os"]
+keywords = ["keyboard", "keylayout", "keymap", "scancode", "input"]
+name = "scancode-convert"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.docs.rs]
+features = ["serde"]
+
 [dependencies]
+cty = "0.2"
+serde = { version = "1.0", features = ["derive"], optional = true }
+thiserror = "1.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = ["winuser"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+xkbcommon = { version = "0.4.0", features = ["x11", "wayland"] }
+xcb = "0.8.0"
+wayland-client = "0.29.1"
