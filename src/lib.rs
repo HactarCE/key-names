@@ -10,11 +10,11 @@ mod macos;
 mod windows;
 
 #[cfg(windows)]
-type KeyNamer = windows::WindowsKeyNamer;
+pub type KeyNamer = windows::WindowsKeyNamer;
 #[cfg(target_os = "linux")]
-type KeyNamer = linux::LinuxKeyNamer;
+pub type KeyNamer = linux::LinuxKeyNamer;
 #[cfg(target_os = "macos")]
-type KeyNamer = macos::MacosKeyNamer;
+pub type KeyNamer = macos::MacosKeyNamer;
 
 pub fn get_key_namer() -> Result<KeyNamer, KeyNamerError> {
     #[cfg(windows)]
