@@ -1,23 +1,20 @@
 [package]
 authors = ["HactarCE"]
-description = "Platform-aware keyboard scancode handling for Rust applications"
-repository = "https://github.com/HactarCE/scancode-convert-rs"
+description = "Platform-aware keyboard key name handling for Rust applications"
+repository = "https://github.com/HactarCE/key-names"
 license = "MIT OR Apache-2.0"
 categories = ["game-development", "gui", "internationalization", "os"]
 keywords = ["keyboard", "keylayout", "keymap", "scancode", "input"]
-name = "scancode-convert"
+name = "key-names"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[package.metadata.docs.rs]
-features = ["serde"]
-
 [dependencies]
 cty = "0.2"
-serde = { version = "1.0", features = ["derive"], optional = true }
 thiserror = "1.0"
+keycode = "0.3"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["winuser"] }

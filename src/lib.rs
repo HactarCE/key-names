@@ -1,17 +1,13 @@
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+pub use keycode::*;
 use std::fmt;
 use thiserror::Error;
 
-mod keys;
 #[cfg(target_os = "linux")]
 mod linux;
 #[cfg(target_os = "macos")]
 mod macos;
 #[cfg(windows)]
 mod windows;
-
-pub use keys::Key;
 
 #[cfg(windows)]
 type Keymap = windows::WindowsKeymap;
@@ -87,16 +83,16 @@ pub trait OsKeymap: fmt::Debug {
         ret
     }
 
-    /// Converts the OS-specific scancode to an OS-independent key.
-    fn decode_scancode(&self, sc: u32) -> Option<Key>;
-    /// Converts the OS-independent key back into an OS-specific scancode. This
-    /// is not guaranteed to produce the original scancode.
-    fn encode_scancode(&self, key: Key) -> Option<u32>;
+    /// Converts the OS-specific scancode to an OS-independent key mapping code.
+    fn decode_scancode(&self, sc: u16) -> Option<KeyMappingCode>;
+    /// Converts the OS-independent key mapping code back into an OS-specific
+    /// scancode. This is not guaranteed to produce the original scancode.
+    fn encode_scancode(&self, key: KeyMappingCode) -> Option<u16>;
 
     /// Uses the operarting system's API to return a name for the scancode.
-    fn scancode_name(&self, sc: u32) -> String;
+    fn scancode_name(&self, sc: u16) -> String;
     /// Uses the operating system's API to return a name for the key.
-    fn key_name(&self, key: Key) -> String {
+    fn key_name(&self, key: KeyMappingCode) -> String {
         match self.encode_scancode(key) {
             Some(sc) => self.scancode_name(sc),
             None => format!("{:?}", key),

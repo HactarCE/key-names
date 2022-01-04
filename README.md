@@ -1,6 +1,6 @@
-# scancode-convert-rs
+# key-names
 
-Platform-aware keyboard scancode handling for Rust applications
+Platform-aware keyboard key name handling for Rust applications. This crate is roughly a fork of [keyboard-keynames](https://crates.io/crates/keyboard-keynames), with a few extra features as well as integration with the [keycode](https://docs.rs/keycode/0.3.0/keycode/index.html) crate.
 
 Features:
 
