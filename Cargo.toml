@@ -13,13 +13,13 @@ edition = "2021"
 
 [dependencies]
 cty = "0.2"
-thiserror = "1.0"
 keycode = "0.3"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["winuser"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
+thiserror = "1.0"
 xkbcommon = { version = "0.4.0", features = ["x11", "wayland"] }
 xcb = "0.8.0"
 wayland-client = "0.29.1"

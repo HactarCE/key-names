@@ -1,14 +1,13 @@
-use key_names::*;
+use key_names::{key_name, mods_prefix_string, KeyMappingCode};
 
 fn main() {
-    let keymap = get_key_namer().expect("failed to get keymap");
     for &key in ALL_KEYS {
-        println!("{:>30} -> {:?}", format!("{:?}", key), keymap.key_name(key));
+        println!("{:>30} -> {:?}", format!("{:?}", key), key_name(key));
     }
     println!();
     println!(
         "Modifiers: {}<key>",
-        keymap.display_mods(true, true, true, true),
+        mods_prefix_string(true, true, true, true),
     );
 }
 
