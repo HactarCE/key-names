@@ -3,8 +3,8 @@ use super::*;
 const INVALID: u16 = 0xFFFF;
 
 #[derive(Debug, Default, Copy, Clone)]
-pub struct MacosKeymap;
-impl OsKeymap for MacosKeymap {
+pub struct MacosKeyNamer;
+impl OsKeyNamer for MacosKeyNamer {
     fn alt_str(&self) -> &'static str {
         "Option"
     }

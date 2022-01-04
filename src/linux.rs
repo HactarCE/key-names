@@ -12,15 +12,15 @@ use super::*;
 const INVALID: u16 = 0x0000;
 
 #[derive(Clone)]
-pub struct LinuxKeymap {
+pub struct LinuxKeyNamer {
     keymap: xkb::Keymap,
 }
-impl fmt::Debug for LinuxKeymap {
+impl fmt::Debug for LinuxKeyNamer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "LinuxKeymap")
+        write!(f, "LinuxKeyNamer")
     }
 }
-impl OsKeymap for LinuxKeymap {
+impl OsKeynamer for LinuxKeyNamer {
     fn logo_str(&self) -> &'static str {
         "Super"
     }
@@ -44,7 +44,7 @@ impl OsKeymap for LinuxKeymap {
         key_name
     }
 }
-impl LinuxKeymap {
+impl LinuxKeyNamer {
     /// Constructs a keymap using either X11 or Wayland automatically.
     pub fn new() -> Result<Self, KeymapError> {
         match std::env::var("XDG_SESSION_TYPE") {

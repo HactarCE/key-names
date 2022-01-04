@@ -10,23 +10,23 @@ mod macos;
 mod windows;
 
 #[cfg(windows)]
-type Keymap = windows::WindowsKeymap;
+type KeyNamer = windows::WindowsKeyNamer;
 #[cfg(target_os = "linux")]
-type Keymap = linux::LinuxKeymap;
+type KeyNamer = linux::LinuxKeyNamer;
 #[cfg(target_os = "macos")]
-type Keymap = macos::MacosKeymap;
+type KeyNamer = macos::MacosKeyNamer;
 
-pub fn get_keymap() -> Result<Keymap, KeymapError> {
+pub fn get_key_namer() -> Result<KeyNamer, KeyNamerError> {
     #[cfg(windows)]
-    return Ok(windows::WindowsKeymap);
+    return Ok(windows::WindowsKeyNamer);
     #[cfg(target_os = "linux")]
-    return linux::LinuxKeymap::new();
+    return linux::LinuxKeyNamer::new();
     #[cfg(target_os = "macos")]
-    return Ok(macos::MacosKeymap);
+    return Ok(macos::MacosKeyNamer);
 }
 
 #[derive(Error, Debug)]
-pub enum KeymapError {
+pub enum KeyNamerError {
     #[error("unable to connect to X server")]
     X11Connect,
 
@@ -42,7 +42,7 @@ pub enum KeymapError {
     FailedToCreateKeymap,
 }
 
-pub trait OsKeymap: fmt::Debug {
+pub trait OsKeyNamer: fmt::Debug {
     /// Returns the OS's conventional name for the <key>Ctrl</key> modifier.
     fn ctrl_str(&self) -> &'static str {
         "Ctrl"

@@ -3,8 +3,8 @@ use super::*;
 const INVALID: u16 = 0x0000;
 
 #[derive(Debug, Default, Copy, Clone)]
-pub struct WindowsKeymap;
-impl OsKeymap for WindowsKeymap {
+pub struct WindowsKeyNamer;
+impl OsKeyNamer for WindowsKeyNamer {
     fn logo_str(&self) -> &'static str {
         "Win"
     }

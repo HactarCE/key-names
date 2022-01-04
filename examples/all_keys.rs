@@ -1,7 +1,7 @@
 use key_names::*;
 
 fn main() {
-    let keymap = get_keymap().expect("failed to get keymap");
+    let keymap = get_key_namer().expect("failed to get keymap");
     for &key in ALL_KEYS {
         println!("{:>30} -> {:?}", format!("{:?}", key), keymap.key_name(key));
     }
