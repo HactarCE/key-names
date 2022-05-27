@@ -1,6 +1,6 @@
 # key-names
 
-Platform-aware keyboard key name handling for Rust applications. This crate is roughly a fork of [keyboard-keynames](https://crates.io/crates/keyboard-keynames), with a few extra features as well as integration with the [keycode](https://docs.rs/keycode/0.3.0/keycode/index.html) crate.
+Platform-aware keyboard key name handling for Rust applications. This crate is roughly a fork of [keyboard-keynames](https://crates.io/crates/keyboard-keynames), with a few extra features as well as integration with the [keycode](https://docs.rs/keycode/0.3.0/keycode/index.html) crate and [`winit::event::VirtualKeyCode`](https://docs.rs/winit/0.26.1/winit/event/enum.VirtualKeyCode.html) (requires `winit` feature).
 
 Features:
 
@@ -19,3 +19,7 @@ Run `cargo run --example all_keys` to see the key names produced by this library
 | Windows | Ctrl + Shift + Alt + Win + ...    |
 | Linux   | Ctrl + Shift + Alt + Super + ...  |
 | macOS   | Ctrl + Option + Shift + Cmd + ... |
+
+## Contributing
+
+WASM support is highly desirable. PRs welcome!
