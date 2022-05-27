@@ -81,3 +81,10 @@ pub fn key_name(key: KeyMappingCode) -> String {
         None => format!("{:?}", key),
     }
 }
+
+/// Converts the key mapping code to a virtual keycode
+#[cfg(feature = "winit")]
+pub fn key_to_winit_vkey(key: KeyMappingCode) -> Option<winit::event::VirtualKeyCode> {
+    let key_map = KeyMap::try_from(KeyMapping::Code(Some(key))).ok()?;
+    os::key_map_to_winit_vkey(key_map)
+}
