@@ -40,6 +40,7 @@ pub fn scancode_name(sc: u16) -> String {
 /// I removed a big chunk of commented-out lines.
 #[cfg(feature = "winit")]
 pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode> {
+    use winit::event::VirtualKeyCode;
     use xkb::keysyms;
 
     let keysym = XKB_KEYMAP.with(|xkb_keymap| {
@@ -316,11 +317,11 @@ pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode
         //keysyms::KEY_nobreakspace => VirtualKeyCode::Nobreakspace,
         //keysyms::KEY_exclamdown => VirtualKeyCode::Exclamdown,
         // ... removed some lines here
-        ffi::XF86XK_Back => VirtualKeyCode::NavigateBackward,
-        ffi::XF86XK_Forward => VirtualKeyCode::NavigateForward,
-        ffi::XF86XK_Copy => VirtualKeyCode::Copy,
-        ffi::XF86XK_Paste => VirtualKeyCode::Paste,
-        ffi::XF86XK_Cut => VirtualKeyCode::Cut,
+        keysyms::KEY_XF86Back => VirtualKeyCode::NavigateBackward,
+        keysyms::KEY_XF86Forward => VirtualKeyCode::NavigateForward,
+        keysyms::KEY_XF86Copy => VirtualKeyCode::Copy,
+        keysyms::KEY_XF86Paste => VirtualKeyCode::Paste,
+        keysyms::KEY_XF86Cut => VirtualKeyCode::Cut,
         _ => return None,
     })
 }
