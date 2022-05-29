@@ -52,9 +52,11 @@ pub fn scancode_name(sc: u16) -> String {
 pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode> {
     use winapi::um::winuser::*;
     use winit::event::VirtualKeyCode;
-    let vkey = key.win as _;
+    let vkey = unsafe {
+        winapi::um::winuser::MapVirtualKeyW(key.win as _, winapi::um::winuser::MAPVK_VSC_TO_VK)
+    };
     // VK_* codes are documented here https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
-    match vkey {
+    match vkey as _ {
         //VK_LBUTTON => Some(VirtualKeyCode::Lbutton),
         //VK_RBUTTON => Some(VirtualKeyCode::Rbutton),
         //VK_CANCEL => Some(VirtualKeyCode::Cancel),
