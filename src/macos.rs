@@ -96,7 +96,7 @@ fn key_name(key: KeyMappingCode) -> String {
 pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode> {
     use winit::event::VirtualKeyCode as Vk;
     use KeyMappingCode as Km;
-    Some(match key {
+    Some(match key.code? {
         Km::Digit0 => Vk::Key0,
         Km::Digit1 => Vk::Key1,
         Km::Digit2 => Vk::Key2,
