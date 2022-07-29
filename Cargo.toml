@@ -6,7 +6,7 @@ license = "MIT OR Apache-2.0"
 categories = ["game-development", "gui", "internationalization", "os"]
 keywords = ["keyboard", "keylayout", "keymap", "scancode", "input"]
 name = "key-names"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -22,5 +22,5 @@ winapi = { version = "0.3.9", features = ["winuser"] }
 [target.'cfg(target_os = "linux")'.dependencies]
 thiserror = "1.0"
 xkbcommon = { version = "0.4", features = ["x11", "wayland"] }
-xcb = "1.0"
+xcb = "0.8.0"
 wayland-client = "0.29"
