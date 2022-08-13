@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2022-08-13
+
+- Upgraded `xcb` from `^0.8.0` to `^0.9.0`
+- Upgraded `xkbcommon` from `^0.4` to `^0.4.1`
+
 ## [1.1.0] - 2022-08-12
 
 - Added `MODIFIERS_ORDER` constant
