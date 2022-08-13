@@ -18,6 +18,11 @@ use macos as os;
 #[cfg(windows)]
 use windows as os;
 
+/// OS's conventional modifiers order, represented as an ASCII string containing
+/// the characters `csam` for `CTRL`, `SHIFT`, `ALT`, and `META`/`LOGO`
+/// respectively in some order.
+pub const MODIFIERS_ORDER: &str = os::MODIFIERS_ORDER;
+
 /// OS's conventional name for the <key>Ctrl</key> modifier.
 pub const CTRL_STR: &str = "Ctrl";
 /// OS's conventional name for the <key>Shift</key> modifier.
@@ -33,7 +38,7 @@ pub const LOGO_STR: &str = os::LOGO_STR;
 /// + Cmd + ".
 pub fn mods_prefix_string(shift: bool, ctrl: bool, alt: bool, logo: bool) -> String {
     let mut ret = String::new();
-    for ch in os::MODIFIERS_ORDER.chars() {
+    for ch in MODIFIERS_ORDER.chars() {
         match ch {
             's' if shift => {
                 ret += SHIFT_STR;

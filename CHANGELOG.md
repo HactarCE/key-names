@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Added `MODIFIERS_ORDER` constant
+
 ## [1.0.1] - 2022-07-29
 
 - Revert `xcb` dependency to `^0.8.0` to Fix Linux build
