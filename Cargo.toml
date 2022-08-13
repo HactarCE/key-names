@@ -21,6 +21,6 @@ winapi = { version = "0.3.9", features = ["winuser"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 thiserror = "1.0"
-xkbcommon = { version = "0.4", features = ["x11", "wayland"] }
+xkbcommon = { version = "0.4.1", features = ["x11", "wayland"] }
 xcb = "0.9.0"
 wayland-client = "0.29"
