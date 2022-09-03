@@ -15,7 +15,7 @@ pub const MODIFIERS_ORDER: &str = "csam"; // Ctrl + Shift + Alt + Meta
 
 pub const SC_INVALID: u16 = 0x0000;
 pub const SC_TO_KEY_MAPPING: fn(u16) -> KeyMapping = KeyMapping::Xkb;
-pub const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = |k| k.xkb;
+pub const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = |k| k.evdev;
 
 thread_local! {
     static XKB_KEYMAP: xkb::Keymap =
