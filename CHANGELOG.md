@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2022-09-03
+
+- Switched from XKB scancodes to evdev
+
 ## [1.2.0] - 2022-08-13
 
 - Upgraded `xcb` from `^0.8.0` to `^0.9.0`
