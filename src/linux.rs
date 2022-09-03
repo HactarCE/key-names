@@ -14,7 +14,7 @@ pub const LOGO_STR: &str = "Super";
 pub const MODIFIERS_ORDER: &str = "csam"; // Ctrl + Shift + Alt + Meta
 
 pub const SC_INVALID: u16 = 0x0000;
-pub const SC_TO_KEY_MAPPING: fn(u16) -> KeyMapping = KeyMapping::Xkb;
+pub const SC_TO_KEY_MAPPING: fn(u16) -> KeyMapping = KeyMapping::Evdev;
 pub const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = |k| k.evdev;
 
 thread_local! {
