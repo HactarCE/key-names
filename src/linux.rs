@@ -14,8 +14,8 @@ pub const LOGO_STR: &str = "Super";
 pub const MODIFIERS_ORDER: &str = "csam"; // Ctrl + Shift + Alt + Meta
 
 pub const SC_INVALID: u16 = 0x0000;
-pub const SC_TO_KEY_MAPPING: fn(u16) -> KeyMapping = KeyMapping::Xkb;
-pub const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = |k| k.xkb;
+pub const SC_TO_KEY_MAPPING: fn(u16) -> KeyMapping = KeyMapping::Evdev;
+pub const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = |k| k.evdev;
 
 thread_local! {
     static XKB_KEYMAP: xkb::Keymap =
@@ -45,7 +45,7 @@ pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode
 
     let keysym = XKB_KEYMAP.with(|xkb_keymap| {
         // Get keysym from key.
-        xkb::State::new(xkb_keymap).key_get_one_sym(key.xkb as u32)
+        xkb::State::new(xkb_keymap).key_get_one_sym(key.evdev as u32)
     });
 
     Some(match keysym {
