@@ -45,7 +45,7 @@ pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode
 
     let keysym = XKB_KEYMAP.with(|xkb_keymap| {
         // Get keysym from key.
-        xkb::State::new(xkb_keymap).key_get_one_sym(key.xkb as u32)
+        xkb::State::new(xkb_keymap).key_get_one_sym(key.evdev as u32)
     });
 
     Some(match keysym {
