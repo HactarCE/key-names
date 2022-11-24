@@ -25,7 +25,7 @@ thread_local! {
 pub fn scancode_name(sc: u16) -> String {
     let keysym = XKB_KEYMAP.with(|xkb_keymap| {
         // Get keysym from key.
-        xkb::State::new(xkb_keymap).key_get_one_sym(sc as u32)
+        xkb::State::new(xkb_keymap).key_get_one_sym((sc as u32) + 8)
     });
     let mut key_name = xkb::keysym_get_name(keysym);
     if key_name.len() == 1 {
