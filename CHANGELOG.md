@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2023-01-18
+
 - Added web support
   - `web::winit_vkey_to_arbitrary_scancode()`
   - `web::arbitrary_scancode_to_winit_vkey()`
