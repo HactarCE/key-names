@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Added web support
+  - `web::winit_vkey_to_arbitrary_scancode()`
+  - `web::arbitrary_scancode_to_winit_vkey()`
+  - `web::ascii_to_keycode()`
+- Upgraded `keycode` from `0.3` to `0.4`
+- Upgraded `winit` from `0.26` to `0.27`
+
 ## [1.4.0] - 2022-12-02
 
 - Fixed incorrect key names on Linux (#5)

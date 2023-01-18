@@ -4,10 +4,13 @@
 
 pub use keycode::*;
 
+mod common;
 #[cfg(target_os = "linux")]
 mod linux;
 #[cfg(target_os = "macos")]
 mod macos;
+#[cfg(target_arch = "wasm32")]
+pub mod web;
 #[cfg(windows)]
 mod windows;
 
@@ -15,6 +18,8 @@ mod windows;
 use linux as os;
 #[cfg(target_os = "macos")]
 use macos as os;
+#[cfg(target_arch = "wasm32")]
+use web as os;
 #[cfg(windows)]
 use windows as os;
 
