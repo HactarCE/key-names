@@ -6,7 +6,7 @@ license = "MIT OR Apache-2.0"
 categories = ["game-development", "gui", "internationalization", "os"]
 keywords = ["keyboard", "keylayout", "keymap", "scancode", "input"]
 name = "key-names"
-version = "1.5.0"
+version = "1.5.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
