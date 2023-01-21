@@ -11,7 +11,7 @@ pub(crate) const MODIFIERS_ORDER: &str = "csam"; // Ctrl + Shift + Alt + Meta
 
 pub(crate) const SC_INVALID: u16 = 0x0000;
 pub(crate) const SC_TO_KEY_MAPPING: fn(u16) -> KeyMapping = arbitrary_scancode_to_key_mapping;
-pub(crate) const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = |k| k.win;
+pub(crate) const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = key_map_to_arbitrary_scancode;
 
 pub(crate) fn scancode_name(sc: u16) -> String {
     match arbitrary_scancode_to_winit_vkey(sc) {
@@ -747,4 +747,11 @@ fn winit_vkey_to_key_mapping(key: winit::event::VirtualKeyCode) -> KeyMapping {
     };
 
     KeyMapping::Code(Some(key_mapping_code))
+}
+
+fn key_map_to_arbitrary_scancode(km: KeyMap) -> u16 {
+    match key_map_to_winit_vkey(km) {
+        Some(vk) => winit_vkey_to_arbitrary_scancode(vk),
+        None => SC_INVALID,
+    }
 }

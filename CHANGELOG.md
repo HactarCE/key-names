@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2023-01-21
+
+- Fixed incorrect key names on web
+
 ## [1.5.0] - 2023-01-18
 
 - Added web support
