@@ -334,7 +334,7 @@ pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode
 fn new_keymap() -> Result<xkb::Keymap, KeymapError> {
     match std::env::var("XDG_SESSION_TYPE") {
         Ok(session_type) => match session_type.as_str() {
-            "wayland" => return new_wayland_keymap(),
+            "wayland" if std::env::var("WAYLAND_DISPLAY").is_ok() => return new_wayland_keymap(),
             "x11" => return new_x11_keymap(),
             _ => (),
         },
