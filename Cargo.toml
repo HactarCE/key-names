@@ -19,13 +19,13 @@ keycode = "0.4"
 winapi = { version = "0.3.9", features = ["winuser"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-thiserror = "1.0"
-xkbcommon = { version = "0.4.1", features = ["x11", "wayland"] }
-xcb = "0.9.0"
-wayland-client = "0.29"
+thiserror = "2.0.11"
+xkbcommon = { version = "0.8.0", features = ["x11", "wayland"] }
+xcb = "1.5.0"
+wayland-client = "0.31.8"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-winit = { version = "0.27", optional = true }
+winit = { version = "0.30.8", optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-winit = { version = "0.27" }
+winit = { version = "0.30.8" }
