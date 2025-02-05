@@ -1,11 +1,7 @@
-use std::cell::RefCell;
-use std::rc::Rc;
 use thiserror::Error;
-use wayland_client::protocol::wl_keyboard::{KeymapFormat, WlKeyboard};
-use wayland_client::protocol::wl_seat::WlSeat;
-use wayland_client::{DispatchData, Main};
+use wayland_client::protocol::{wl_keyboard, wl_registry, wl_seat};
 use xkb::x11::{MIN_MAJOR_XKB_VERSION, MIN_MINOR_XKB_VERSION};
-use xkbcommon::xkb::{self, KEYMAP_COMPILE_NO_FLAGS, KEYMAP_FORMAT_TEXT_V1};
+use xkbcommon::xkb;
 
 use super::*;
 
@@ -28,8 +24,8 @@ pub fn scancode_name(sc: u16) -> String {
         //
         // According to the xkbcommon documentation, there is a fixed offset
         // of 8 between X11-compatible keymaps and Linux evdev scancodes:
-        // https://docs.rs/xkbcommon/latest/xkbcommon/xkb/type.Keycode.html
-        xkb::State::new(xkb_keymap).key_get_one_sym(sc as u32 + 8)
+        // https://docs.rs/xkbcommon/0.8.0/xkbcommon/xkb/struct.Keycode.html
+        xkb::State::new(xkb_keymap).key_get_one_sym(xkb::Keycode::new(sc as u32 + 8))
     });
     let mut key_name = xkb::keysym_get_name(keysym);
     if key_name.len() == 1 {
@@ -346,19 +342,24 @@ fn new_keymap() -> Result<xkb::Keymap, KeymapError> {
 
 #[derive(Error, Debug)]
 pub enum KeymapError {
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+
     #[error("unable to connect to X server")]
     X11Connect,
 
+    #[error("wayland dispatch error")]
+    Wayland(#[from] wayland_client::DispatchError),
     #[error("unable to connect to wayland")]
     WaylandConnect,
-    #[error("io error")]
-    Io(#[from] std::io::Error),
     #[error("wl_seat not found in available interfaces")]
     MissingWlSeat,
     #[error("wl_seat does not have keyboard capability")]
     MissingKeyboardCapability,
     #[error("failed to create keymap")]
     FailedToCreateKeymap,
+    #[error("unsupported keymap format: {0:?}")]
+    UnsupportedKeymapFormat(wayland_client::WEnum<wl_keyboard::KeymapFormat>),
 }
 
 /// Constructs a keymap in an X11 environment.
@@ -366,14 +367,14 @@ fn new_x11_keymap() -> Result<xkb::Keymap, KeymapError> {
     // This code is modified from Frinksy's `keyboard-keynames` crate:
     // https://gitlab.com/Frinksy/keyboard-keynames/-/blob/master/src/platform/unix/key_layout.rs
 
-    let (conn, _) = xcb::Connection::connect(None).map_err(|_| KeymapError::X11Connect)?;
+    let (connection, _) = xcb::Connection::connect(None).map_err(|_| KeymapError::X11Connect)?;
     let mut major_xkb_version_out = 0;
     let mut minor_xkb_version_out = 0;
     let mut base_event_out = 0;
     let mut base_error_out = 0;
 
     let _ = xkb::x11::setup_xkb_extension(
-        &conn,
+        &connection,
         MIN_MAJOR_XKB_VERSION,
         MIN_MINOR_XKB_VERSION,
         xkb::x11::SetupXkbExtensionFlags::NoFlags,
@@ -383,119 +384,145 @@ fn new_x11_keymap() -> Result<xkb::Keymap, KeymapError> {
         &mut base_error_out,
     );
 
-    let device_id = xkb::x11::get_core_keyboard_device_id(&conn);
+    let device_id = xkb::x11::get_core_keyboard_device_id(&connection);
 
     let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
 
-    Ok(xkb::x11::keymap_new_from_device(&ctx, &conn, device_id, 0))
+    Ok(xkb::x11::keymap_new_from_device(
+        &ctx,
+        &connection,
+        device_id,
+        0,
+    ))
 }
 
 /// Constructs a keymap in a Wayland environment.
 fn new_wayland_keymap() -> Result<xkb::Keymap, KeymapError> {
-    // This code is modified from Frinksy's `keyboard-keynames` crate:
-    // https://gitlab.com/Frinksy/keyboard-keynames/-/blob/master/src/platform/unix/key_layout.rs
+    let connection =
+        wayland_client::Connection::connect_to_env().map_err(|_| KeymapError::WaylandConnect)?;
+    let display = connection.display();
 
-    let display =
-        wayland_client::Display::connect_to_env().map_err(|_| KeymapError::WaylandConnect)?;
+    // Get the registry.
+    let mut state = State::default();
+    let mut event_queue = connection.new_event_queue::<State>();
+    let qhandle = event_queue.handle();
+    let _registry = display.get_registry(&qhandle, ());
 
-    // Set up the event queue.
-    let mut event_queue = display.create_event_queue();
-    let token = event_queue.token();
+    event_queue.roundtrip(&mut state)?; // Get WlSeat
+    if !state.wl_seat {
+        return Err(KeymapError::MissingWlSeat);
+    }
 
-    let proxy = &*display;
-    let attached = proxy.attach(token);
-    let registry = attached.get_registry();
+    event_queue.roundtrip(&mut state)?; // Get WlKeyboard
+    if !state.wl_keyboard {
+        return Err(KeymapError::MissingKeyboardCapability);
+    }
 
-    // Listen for available interfaces.
-    let available_interfaces = Rc::new(RefCell::new(Vec::<(u32, String, u32)>::new()));
-    let available_interfaces_copy = Rc::clone(&available_interfaces);
+    event_queue.roundtrip(&mut state)?; // Get keymap
+    state
+        .keymap
+        .clone()
+        .ok_or(state.error.unwrap_or(KeymapError::FailedToCreateKeymap))
+}
 
-    registry.quick_assign(move |_reg, event, _data| {
-        if let wayland_client::protocol::wl_registry::Event::Global {
+#[derive(Default)]
+struct State {
+    wl_seat: bool,
+    wl_keyboard: bool,
+    keymap: Option<xkb::Keymap>,
+    error: Option<KeymapError>,
+}
+
+impl wayland_client::Dispatch<wl_registry::WlRegistry, ()> for State {
+    fn event(
+        state: &mut Self,
+        registry: &wl_registry::WlRegistry,
+        event: wl_registry::Event,
+        _: &(),
+        _: &wayland_client::Connection,
+        qh: &wayland_client::QueueHandle<Self>,
+    ) {
+        if let wl_registry::Event::Global {
             name,
             interface,
             version,
         } = event
         {
-            (*available_interfaces_copy)
-                .borrow_mut()
-                .push((name, interface, version));
-        }
-    });
-
-    event_queue.sync_roundtrip(&mut (), |_, _, _| {})?;
-
-    // Bind to wl_seat if available. First, find wl_seat tuple.
-    let (seat_name, _seat_interface, seat_version) = (*available_interfaces)
-        .borrow()
-        .iter()
-        .find(|(_name, interface, _version)| interface == "wl_seat")
-        .ok_or(KeymapError::MissingWlSeat)?
-        .clone();
-
-    attached.sync();
-
-    let wl_seat = registry.bind::<WlSeat>(seat_version, seat_name);
-
-    let capabilities = Rc::new(RefCell::new(
-        wayland_client::protocol::wl_seat::Capability::empty(),
-    ));
-    let capabilities_copy = Rc::clone(&capabilities);
-    wl_seat.quick_assign(move |_seat, event, _data| {
-        if let wayland_client::protocol::wl_seat::Event::Capabilities { capabilities } = event {
-            (*capabilities_copy).borrow_mut().set(capabilities, true);
-        }
-    });
-    event_queue.sync_roundtrip(&mut (), |_, _, _| {})?;
-
-    // Check capabilities of wl_seat.
-    if !(*capabilities)
-        .borrow()
-        .contains(wayland_client::protocol::wl_seat::Capability::Keyboard)
-    {
-        return Err(KeymapError::MissingKeyboardCapability);
-    }
-
-    let wl_keyboard = wl_seat.get_keyboard();
-
-    // Get keymap from compositor.
-    let file_descriptor = Rc::new(RefCell::new(-1));
-    let size = Rc::new(RefCell::new(0));
-    let file_descriptor_copy = Rc::clone(&file_descriptor);
-    let size_copy = Rc::clone(&size);
-    wl_keyboard.quick_assign(
-        move |_object: Main<WlKeyboard>,
-              event: wayland_client::protocol::wl_keyboard::Event,
-              _data: DispatchData<'_>| {
-            if let wayland_client::protocol::wl_keyboard::Event::Keymap { format, fd, size } = event
-            {
-                match format {
-                    KeymapFormat::XkbV1 => {
-                        *file_descriptor_copy.borrow_mut() = fd;
-                        *size_copy.borrow_mut() = size;
-                    }
-                    KeymapFormat::NoKeymap => {
-                        panic!("NoKeymap format");
-                    }
-                    _ => {
-                        panic!("Keymap Format not supported");
-                    }
-                };
+            match interface.as_str() {
+                "wl_seat" => {
+                    state.wl_seat = true;
+                    registry.bind::<wl_seat::WlSeat, _, _>(name, version, qh, ());
+                }
+                _ => {}
             }
-        },
-    );
-    event_queue.sync_roundtrip(&mut (), |_, _, _| {})?;
-
-    // Construct keymap from file descriptor.
-    let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
-    let keymap = xkb::Keymap::new_from_fd(
-        &ctx,
-        *(*file_descriptor).borrow(),
-        (*(*size).borrow()).try_into().unwrap(),
-        KEYMAP_FORMAT_TEXT_V1,
-        KEYMAP_COMPILE_NO_FLAGS,
-    )
-    .ok_or(KeymapError::FailedToCreateKeymap)?;
-
-    Ok(keymap)
+        }
+    }
 }
+
+impl wayland_client::Dispatch<wl_seat::WlSeat, ()> for State {
+    fn event(
+        state: &mut Self,
+        seat: &wl_seat::WlSeat,
+        event: wl_seat::Event,
+        _: &(),
+        _: &wayland_client::Connection,
+        qh: &wayland_client::QueueHandle<Self>,
+    ) {
+        if let wl_seat::Event::Capabilities {
+            capabilities: wayland_client::WEnum::Value(capabilities),
+        } = event
+        {
+            if capabilities.contains(wl_seat::Capability::Keyboard) {
+                state.wl_keyboard = true;
+                seat.get_keyboard(qh, ());
+            }
+        }
+    }
+}
+
+impl wayland_client::Dispatch<wl_keyboard::WlKeyboard, ()> for State {
+    fn event(
+        state: &mut Self,
+        _: &wl_keyboard::WlKeyboard,
+        event: wl_keyboard::Event,
+        _: &(),
+        _: &wayland_client::Connection,
+        _: &wayland_client::QueueHandle<Self>,
+    ) {
+        match event {
+            wl_keyboard::Event::Keymap { format, fd, size } => {
+                match format {
+                    wayland_client::WEnum::Value(wl_keyboard::KeymapFormat::XkbV1) => {
+                        // Construct keymap from file descriptor
+                        let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
+                        let result = unsafe {
+                            xkb::Keymap::new_from_fd(
+                                &ctx,
+                                fd,
+                                size as usize,
+                                xkb::KEYMAP_FORMAT_TEXT_V1,
+                                xkb::KEYMAP_COMPILE_NO_FLAGS,
+                            )
+                        };
+                        match result {
+                            Ok(Some(keymap)) => state.keymap = Some(keymap),
+                            Ok(None) => state.error = Some(KeymapError::FailedToCreateKeymap),
+                            Err(e) => state.error = Some(KeymapError::Io(e)),
+                        }
+                    }
+
+                    other => state.error = Some(KeymapError::UnsupportedKeymapFormat(other)),
+                }
+            }
+
+            _ => (), // Ignore other events
+        }
+    }
+}
+
+// Ignore events from other object types
+wayland_client::delegate_noop!(State: ignore wayland_client::protocol::wl_compositor::WlCompositor);
+wayland_client::delegate_noop!(State: ignore wayland_client::protocol::wl_surface::WlSurface);
+wayland_client::delegate_noop!(State: ignore wayland_client::protocol::wl_shm::WlShm);
+wayland_client::delegate_noop!(State: ignore wayland_client::protocol::wl_shm_pool::WlShmPool);
+wayland_client::delegate_noop!(State: ignore wayland_client::protocol::wl_buffer::WlBuffer);
