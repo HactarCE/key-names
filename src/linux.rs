@@ -328,13 +328,12 @@ pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode
 
 /// Constructs a keymap using either X11 or Wayland automatically.
 fn new_keymap() -> Result<xkb::Keymap, KeymapError> {
-    match std::env::var("XDG_SESSION_TYPE") {
-        Ok(session_type) => match session_type.as_str() {
+    if let Ok(session_type) = std::env::var("XDG_SESSION_TYPE") {
+        match session_type.as_str() {
             "wayland" if std::env::var("WAYLAND_DISPLAY").is_ok() => return new_wayland_keymap(),
             "x11" => return new_x11_keymap(),
             _ => (),
-        },
-        Err(_) => (),
+        }
     }
     // Just try both and return whichever succeeds.
     new_wayland_keymap().or_else(|_| new_x11_keymap())
@@ -448,12 +447,9 @@ impl wayland_client::Dispatch<wl_registry::WlRegistry, ()> for State {
             version,
         } = event
         {
-            match interface.as_str() {
-                "wl_seat" => {
-                    state.wl_seat = true;
-                    registry.bind::<wl_seat::WlSeat, _, _>(name, version, qh, ());
-                }
-                _ => {}
+            if interface.as_str() == "wl_seat" {
+                state.wl_seat = true;
+                registry.bind::<wl_seat::WlSeat, _, _>(name, version, qh, ());
             }
         }
     }
@@ -489,33 +485,29 @@ impl wayland_client::Dispatch<wl_keyboard::WlKeyboard, ()> for State {
         _: &wayland_client::Connection,
         _: &wayland_client::QueueHandle<Self>,
     ) {
-        match event {
-            wl_keyboard::Event::Keymap { format, fd, size } => {
-                match format {
-                    wayland_client::WEnum::Value(wl_keyboard::KeymapFormat::XkbV1) => {
-                        // Construct keymap from file descriptor
-                        let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
-                        let result = unsafe {
-                            xkb::Keymap::new_from_fd(
-                                &ctx,
-                                fd,
-                                size as usize,
-                                xkb::KEYMAP_FORMAT_TEXT_V1,
-                                xkb::KEYMAP_COMPILE_NO_FLAGS,
-                            )
-                        };
-                        match result {
-                            Ok(Some(keymap)) => state.keymap = Some(keymap),
-                            Ok(None) => state.error = Some(KeymapError::FailedToCreateKeymap),
-                            Err(e) => state.error = Some(KeymapError::Io(e)),
-                        }
+        if let wl_keyboard::Event::Keymap { format, fd, size } = event {
+            match format {
+                wayland_client::WEnum::Value(wl_keyboard::KeymapFormat::XkbV1) => {
+                    // Construct keymap from file descriptor
+                    let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
+                    let result = unsafe {
+                        xkb::Keymap::new_from_fd(
+                            &ctx,
+                            fd,
+                            size as usize,
+                            xkb::KEYMAP_FORMAT_TEXT_V1,
+                            xkb::KEYMAP_COMPILE_NO_FLAGS,
+                        )
+                    };
+                    match result {
+                        Ok(Some(keymap)) => state.keymap = Some(keymap),
+                        Ok(None) => state.error = Some(KeymapError::FailedToCreateKeymap),
+                        Err(e) => state.error = Some(KeymapError::Io(e)),
                     }
-
-                    other => state.error = Some(KeymapError::UnsupportedKeymapFormat(other)),
                 }
-            }
 
-            _ => (), // Ignore other events
+                other => state.error = Some(KeymapError::UnsupportedKeymapFormat(other)),
+            }
         }
     }
 }
