@@ -1,5 +1,4 @@
 use thiserror::Error;
-use wayland_client::backend::WaylandError;
 use wayland_client::protocol::{wl_keyboard, wl_registry, wl_seat};
 use xkb::x11::{MIN_MAJOR_XKB_VERSION, MIN_MINOR_XKB_VERSION};
 use xkbcommon::xkb;
