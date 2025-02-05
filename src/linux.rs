@@ -1,4 +1,5 @@
 use thiserror::Error;
+use wayland_client::backend::WaylandError;
 use wayland_client::protocol::{wl_keyboard, wl_registry, wl_seat};
 use xkb::x11::{MIN_MAJOR_XKB_VERSION, MIN_MINOR_XKB_VERSION};
 use xkbcommon::xkb;
@@ -328,15 +329,25 @@ pub fn key_map_to_winit_vkey(key: KeyMap) -> Option<winit::event::VirtualKeyCode
 
 /// Constructs a keymap using either X11 or Wayland automatically.
 fn new_keymap() -> Result<xkb::Keymap, KeymapError> {
+    // Just try both and return whichever succeeds.
+    let wayland_error = match new_wayland_keymap() {
+        Ok(keymap) => return Ok(keymap),
+        Err(e) => e,
+    };
+    let x11_error = match new_x11_keymap() {
+        Ok(keymap) => return Ok(keymap),
+        Err(e) => e,
+    };
+    // Decide which error to report
     if let Ok(session_type) = std::env::var("XDG_SESSION_TYPE") {
         match session_type.as_str() {
-            "wayland" if std::env::var("WAYLAND_DISPLAY").is_ok() => return new_wayland_keymap(),
-            "x11" => return new_x11_keymap(),
-            _ => (),
+            "wayland" if std::env::var("WAYLAND_DISPLAY").is_ok() => Err(wayland_error),
+            "x11" => Err(x11_error),
+            _ => Err(x11_error),
         }
+    } else {
+        Err(x11_error)
     }
-    // Just try both and return whichever succeeds.
-    new_wayland_keymap().or_else(|_| new_x11_keymap())
 }
 
 #[derive(Error, Debug)]
