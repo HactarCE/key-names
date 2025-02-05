@@ -1,5 +1,9 @@
 # key-names
 
+[![Latest version](https://img.shields.io/crates/v/key-names.svg)](https://crates.io/crates/key-names)
+[![Documentation](https://docs.rs/key-names/badge.svg)](https://docs.rs/key-names)
+
+
 Platform-aware keyboard key name handling for Rust applications. This crate is roughly a fork of [keyboard-keynames](https://crates.io/crates/keyboard-keynames), with a few extra features as well as integration with the [keycode](https://docs.rs/keycode/0.3.0/keycode/index.html) crate and [`winit::event::VirtualKeyCode`](https://docs.rs/winit/0.26.1/winit/event/enum.VirtualKeyCode.html) (requires `winit` feature).
 
 Features:
