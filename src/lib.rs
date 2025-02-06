@@ -9,7 +9,7 @@ mod linux;
 #[cfg(target_os = "macos")]
 mod macos;
 #[cfg(target_arch = "wasm32")]
-pub mod web;
+mod web;
 #[cfg(windows)]
 mod windows;
 

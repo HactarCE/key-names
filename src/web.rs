@@ -1,4 +1,4 @@
-use winit::keyboard::{KeyCode, NamedKey, NativeKeyCode, PhysicalKey};
+use winit::keyboard::{KeyCode, NamedKey, PhysicalKey};
 
 pub const ALT_STR: &str = "Alt";
 pub const LOGO_STR: &str = "Super";
