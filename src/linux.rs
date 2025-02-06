@@ -40,11 +40,35 @@ pub fn scancode_name(sc: u16) -> String {
         // https://docs.rs/xkbcommon/0.8.0/xkbcommon/xkb/struct.Keycode.html
         xkb::State::new(xkb_keymap).key_get_one_sym(xkb::Keycode::new(sc as u32 + 8))
     });
-    let mut key_name = xkb::keysym_get_name(keysym);
-    if key_name.len() == 1 {
-        key_name.make_ascii_uppercase();
+    match keysym.raw() {
+        // Better names for numpad keys
+        xkb::keysyms::KEY_KP_Insert => "Numpad0".to_string(),
+        xkb::keysyms::KEY_KP_End => "Numpad1".to_string(),
+        xkb::keysyms::KEY_KP_Down => "Numpad2".to_string(),
+        xkb::keysyms::KEY_KP_Next => "Numpad3".to_string(),
+        xkb::keysyms::KEY_KP_Left => "Numpad4".to_string(),
+        xkb::keysyms::KEY_KP_Begin => "Numpad5".to_string(),
+        xkb::keysyms::KEY_KP_Right => "Numpad6".to_string(),
+        xkb::keysyms::KEY_KP_Home => "Numpad7".to_string(),
+        xkb::keysyms::KEY_KP_Up => "Numpad8".to_string(),
+        xkb::keysyms::KEY_KP_Prior => "Numpad9".to_string(),
+        xkb::keysyms::KEY_KP_Add => "NumpadAdd".to_string(),
+        xkb::keysyms::KEY_KP_Decimal => "NumpadComma".to_string(),
+        xkb::keysyms::KEY_KP_Delete => "NumpadDecimal".to_string(),
+        xkb::keysyms::KEY_KP_Divide => "NumpadDivide".to_string(),
+        xkb::keysyms::KEY_KP_Enter => "NumpadEnter".to_string(),
+        xkb::keysyms::KEY_KP_Equal => "NumpadEqual".to_string(),
+        xkb::keysyms::KEY_KP_Multiply => "NumpadMultiply".to_string(),
+        xkb::keysyms::KEY_KP_Subtract => "NumpadSubtract".to_string(),
+
+        _ => {
+            let mut key_name = xkb::keysym_get_name(keysym);
+            if key_name.len() == 1 {
+                key_name.make_ascii_uppercase();
+            }
+            key_name
+        }
     }
-    key_name
 }
 
 /// Constructs a keymap using either X11 or Wayland automatically.
