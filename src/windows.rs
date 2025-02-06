@@ -17,11 +17,10 @@ pub fn os_specific_key_name(key: NamedKey) -> Option<&'static str> {
     }
 }
 
-pub fn physical_key_name(physical_key: PhysicalKey) -> String {
-    match physical_key.to_scancode() {
-        Some(sc) => scancode_name(sc as u16),
-        None => format!("{physical_key:?}"),
-    }
+pub fn try_physical_key_name(physical_key: PhysicalKey) -> Option<String> {
+    physical_key
+        .to_scancode()
+        .map(|sc| scancode_name(sc as u16))
 }
 
 fn scancode_name(sc: u16) -> String {

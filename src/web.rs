@@ -16,8 +16,8 @@ pub fn os_specific_key_name(key: NamedKey) -> Option<&'static str> {
     }
 }
 
-pub fn physical_key_name(physical_key: PhysicalKey) -> String {
-    match physical_key {
+pub fn try_physical_key_name(physical_key: PhysicalKey) -> Option<String> {
+    let s = match physical_key {
         PhysicalKey::Code(key_code) => match key_code {
             KeyCode::Backquote => "`",
             KeyCode::Backslash => "\\",
@@ -82,16 +82,11 @@ pub fn physical_key_name(physical_key: PhysicalKey) -> String {
             KeyCode::ArrowRight => "Right",
             KeyCode::ArrowUp => "Up",
 
-            other => return format!("{:?}", other),
-        }
-        .to_string(),
-
-        PhysicalKey::Unidentified(native_key_code) => match native_key_code {
-            NativeKeyCode::Unidentified => "<unknown>".to_string(),
-            NativeKeyCode::Android(sc) => format!("SC{sc}"),
-            NativeKeyCode::MacOS(sc) => format!("SC{sc}"),
-            NativeKeyCode::Windows(sc) => format!("SC{sc}"),
-            NativeKeyCode::Xkb(sc) => format!("SC{sc}"),
+            _ => return None,
         },
-    }
+
+        _ => return None,
+    };
+
+    Some(s.to_string())
 }

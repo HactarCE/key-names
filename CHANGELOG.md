@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Removed keycodes dependency
 - **BREAKING:** Updated winit from 0.27 to 0.30.8 and added it as a non-optional dependency
 - **BREAKING:** Removed `sc_to_key()`, `key_to_sc()`, and `key_to_winit_vkey()`
-- **BREAKING:** Replaced `scancode_name(sc: u16)` with `physical_key_name(key: winit::keyboard::PhysicalKey)`
+- **BREAKING:** Replaced `scancode_name(sc: u16)` with `physical_key_name(physical_key: winit::keyboard::PhysicalKey)`
 - **BREAKING:** Replaced `key_name(key: keycode::KeyMappingCode)` with `key_name(key: winit::keyboard::Key)`
 - Changed "Logo" to "Super" on web
 

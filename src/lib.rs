@@ -2,7 +2,7 @@
 
 #![warn(missing_docs)]
 
-use winit::keyboard::{Key, NativeKey, PhysicalKey};
+use winit::keyboard::{Key, NativeKey, NativeKeyCode, PhysicalKey};
 
 #[cfg(target_os = "linux")]
 mod linux;
@@ -71,8 +71,17 @@ pub fn mods_prefix_string(shift: bool, ctrl: bool, alt: bool, logo: bool) -> Str
 ///
 /// On Windows and Linux, this queries the user's keyboard layout. On macOS and
 /// web, hard-coded key names are used.
-pub fn physical_key_name(key: PhysicalKey) -> String {
-    os::physical_key_name(key)
+pub fn physical_key_name(physical_key: PhysicalKey) -> String {
+    os::try_physical_key_name(physical_key).unwrap_or_else(|| match physical_key {
+        PhysicalKey::Code(key_code) => format!("{key_code:?}"),
+        PhysicalKey::Unidentified(native_key_code) => match native_key_code {
+            NativeKeyCode::Unidentified => "<unknown>".to_string(),
+            NativeKeyCode::Android(sc) => format!("SC{sc}"),
+            NativeKeyCode::MacOS(sc) => format!("SC{sc}"),
+            NativeKeyCode::Windows(sc) => format!("SC{sc}"),
+            NativeKeyCode::Xkb(sc) => format!("SC{sc}"),
+        },
+    })
 }
 
 /// Returns a human-friendly name for a virtual key.
