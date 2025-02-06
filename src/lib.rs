@@ -2,9 +2,8 @@
 
 #![warn(missing_docs)]
 
-pub use keycode::*;
+use winit::keyboard::{Key, NativeKey, PhysicalKey};
 
-mod common;
 #[cfg(target_os = "linux")]
 mod linux;
 #[cfg(target_os = "macos")]
@@ -67,34 +66,35 @@ pub fn mods_prefix_string(shift: bool, ctrl: bool, alt: bool, logo: bool) -> Str
     ret
 }
 
-/// Converts the OS-specific scancode to an OS-independent key mapping code.
-pub fn sc_to_key(sc: u16) -> Option<KeyMappingCode> {
-    let key_mapping = os::SC_TO_KEY_MAPPING(sc);
-    KeyMap::try_from(key_mapping).ok()?.code
-}
-/// Converts the OS-independent key mapping code back into an OS-specific
-/// scancode. This is not guaranteed to produce the original scancode.
-pub fn key_to_sc(key: KeyMappingCode) -> Option<u16> {
-    let key_map = KeyMap::try_from(KeyMapping::Code(Some(key))).ok()?;
-    let sc = os::KEY_MAP_TO_SC(key_map);
-    Some(sc).filter(|&sc| sc != os::SC_INVALID)
+/// Returns a human-friendly name for a physical key using the operating
+/// system's API when possible.
+///
+/// On Windows and Linux, this queries the user's keyboard layout. On macOS and
+/// web, hard-coded key names are used.
+pub fn physical_key_name(key: PhysicalKey) -> String {
+    os::physical_key_name(key)
 }
 
-/// Uses the operarting system's API to return a name for the scancode.
-pub fn scancode_name(sc: u16) -> String {
-    os::scancode_name(sc)
-}
-/// Uses the operating system's API to return a name for the key.
-pub fn key_name(key: KeyMappingCode) -> String {
-    match key_to_sc(key) {
-        Some(sc) => scancode_name(sc),
-        None => format!("{:?}", key),
+/// Returns a human-friendly name for a virtual key.
+///
+/// Letters are uppercased and some special keys are given OS-specific names
+/// (such as "Win" on Windows vs. "Super" on Linux vs. "Command" on macOS).
+pub fn key_name(key: Key) -> String {
+    match key {
+        Key::Named(named_key) => match os::os_specific_key_name(named_key) {
+            Some(name) => name.to_string(),
+            None => format!("{named_key:?}"),
+        },
+        Key::Character(c) => c.to_ascii_uppercase(),
+        Key::Unidentified(native_key) => match native_key {
+            NativeKey::Unidentified => "<unknown>".to_string(),
+            NativeKey::Android(sc) => format!("SC{sc}"),
+            NativeKey::MacOS(sc) => format!("SC{sc}"),
+            NativeKey::Windows(sc) => format!("SC{sc}"),
+            NativeKey::Xkb(sc) => format!("SC{sc}"),
+            NativeKey::Web(smol_str) => format!("{smol_str}"),
+        },
+        Key::Dead(None) => "<unknown>".to_string(),
+        Key::Dead(Some(c)) => c.into(),
     }
-}
-
-/// Converts the key mapping code to a virtual keycode
-#[cfg(feature = "winit")]
-pub fn key_to_winit_vkey(key: KeyMappingCode) -> Option<winit::event::VirtualKeyCode> {
-    let key_map = KeyMap::try_from(KeyMapping::Code(Some(key))).ok()?;
-    os::key_map_to_winit_vkey(key_map)
 }

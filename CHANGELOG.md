@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **BREAKING:** Removed keycodes dependency
+- **BREAKING:** Updated winit from 0.27 to 0.30.8 and added it as a non-optional dependency
+- **BREAKING:** Removed `sc_to_key()`, `key_to_sc()`, and `key_to_winit_vkey()`
+- **BREAKING:** Replaced `scancode_name(sc: u16)` with `physical_key_name(key: winit::keyboard::PhysicalKey)`
+- **BREAKING:** Replaced `key_name(key: keycode::KeyMappingCode)` with `key_name(key: winit::keyboard::Key)`
+- Changed "Logo" to "Super" on web
+
 ## [2.0.0] - 2025-02-05
 
 - **BREAKING:** Updated wayland-client from 0.29 to 0.31.8
@@ -56,7 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/HactarCE/key-names/compare/v2.0.0...HEAD
+[unreleased]: https://github.com/HactarCE/key-names/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/HactarCE/key-names/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/HactarCE/key-names/compare/v1.5.1...v2.0.0
 [1.5.1]: https://github.com/HactarCE/key-names/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/HactarCE/key-names/compare/v1.4.0...v1.5.0

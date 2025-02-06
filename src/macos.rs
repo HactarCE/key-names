@@ -1,95 +1,108 @@
-use super::*;
-#[cfg(feature = "winit")]
-pub use crate::common::key_map_to_winit_vkey;
+use winit::keyboard::{KeyCode, NamedKey, NativeKeyCode, PhysicalKey};
 
 pub const ALT_STR: &str = "Option";
 pub const LOGO_STR: &str = "Cmd";
 pub const MODIFIERS_ORDER: &str = "casm"; // Ctrl + Alt + Shift + Meta
 
-pub const SC_INVALID: u16 = 0xFFFF;
-pub const SC_TO_KEY_MAPPING: fn(u16) -> KeyMapping = KeyMapping::Mac;
-pub const KEY_MAP_TO_SC: fn(KeyMap) -> u16 = |k| k.mac;
-
-pub fn scancode_name(sc: u16) -> String {
-    match super::sc_to_key(sc) {
-        Some(key) => key_name(key),
-        None => format!("SC{}", sc),
+pub fn os_specific_key_name(key: NamedKey) -> Option<&'static str> {
+    match key {
+        NamedKey::Alt => Some("Option"),
+        NamedKey::AltGraph => Some("Right Option"),
+        NamedKey::ArrowDown => Some("Down"),
+        NamedKey::ArrowLeft => Some("Left"),
+        NamedKey::ArrowRight => Some("Right"),
+        NamedKey::ArrowUp => Some("Up"),
+        NamedKey::Backspace => Some("Delete"),
+        NamedKey::Delete => Some("Forward Delete"),
+        NamedKey::Enter => Some("Return"),
+        NamedKey::Escape => Some("Esc"),
+        NamedKey::Super => Some("Command"),
+        _ => None,
     }
 }
 
-fn key_name(key: KeyMappingCode) -> String {
-    use KeyMappingCode::*;
-    match key {
-        Backquote => "`",
-        Backslash => "\\",
-        BracketLeft => "[",
-        BracketRight => "]",
-        Comma => ",",
-        Digit0 => "0",
-        Digit1 => "1",
-        Digit2 => "2",
-        Digit3 => "3",
-        Digit4 => "4",
-        Digit5 => "5",
-        Digit6 => "6",
-        Digit7 => "7",
-        Digit8 => "8",
-        Digit9 => "9",
-        Equal => "=",
+pub fn physical_key_name(physical_key: PhysicalKey) -> String {
+    match physical_key {
+        PhysicalKey::Code(key_code) => match key_code {
+            KeyCode::Backquote => "`",
+            KeyCode::Backslash => "\\",
+            KeyCode::BracketLeft => "[",
+            KeyCode::BracketRight => "]",
+            KeyCode::Comma => ",",
+            KeyCode::Digit0 => "0",
+            KeyCode::Digit1 => "1",
+            KeyCode::Digit2 => "2",
+            KeyCode::Digit3 => "3",
+            KeyCode::Digit4 => "4",
+            KeyCode::Digit5 => "5",
+            KeyCode::Digit6 => "6",
+            KeyCode::Digit7 => "7",
+            KeyCode::Digit8 => "8",
+            KeyCode::Digit9 => "9",
+            KeyCode::Equal => "=",
 
-        KeyA => "A",
-        KeyB => "B",
-        KeyC => "C",
-        KeyD => "D",
-        KeyE => "E",
-        KeyF => "F",
-        KeyG => "G",
-        KeyH => "H",
-        KeyI => "I",
-        KeyJ => "J",
-        KeyK => "K",
-        KeyL => "L",
-        KeyM => "M",
-        KeyN => "N",
-        KeyO => "O",
-        KeyP => "P",
-        KeyQ => "Q",
-        KeyR => "R",
-        KeyS => "S",
-        KeyT => "T",
-        KeyU => "U",
-        KeyV => "V",
-        KeyW => "W",
-        KeyX => "X",
-        KeyY => "Y",
-        KeyZ => "Z",
-        Minus => "-",
-        Period => ".",
-        Quote => "'",
-        Semicolon => ";",
-        Slash => "/",
+            KeyCode::KeyA => "A",
+            KeyCode::KeyB => "B",
+            KeyCode::KeyC => "C",
+            KeyCode::KeyD => "D",
+            KeyCode::KeyE => "E",
+            KeyCode::KeyF => "F",
+            KeyCode::KeyG => "G",
+            KeyCode::KeyH => "H",
+            KeyCode::KeyI => "I",
+            KeyCode::KeyJ => "J",
+            KeyCode::KeyK => "K",
+            KeyCode::KeyL => "L",
+            KeyCode::KeyM => "M",
+            KeyCode::KeyN => "N",
+            KeyCode::KeyO => "O",
+            KeyCode::KeyP => "P",
+            KeyCode::KeyQ => "Q",
+            KeyCode::KeyR => "R",
+            KeyCode::KeyS => "S",
+            KeyCode::KeyT => "T",
+            KeyCode::KeyU => "U",
+            KeyCode::KeyV => "V",
+            KeyCode::KeyW => "W",
+            KeyCode::KeyX => "X",
+            KeyCode::KeyY => "Y",
+            KeyCode::KeyZ => "Z",
+            KeyCode::Minus => "-",
+            KeyCode::Period => ".",
+            KeyCode::Quote => "'",
+            KeyCode::Semicolon => ";",
+            KeyCode::Slash => "/",
 
-        AltLeft => "Option",
-        AltRight => "Right Option",
-        ControlLeft => "Control",
-        ControlRight => "Right Control",
-        MetaLeft => "Command",
-        MetaRight => "Right Command", // doesn't exist anyway
-        ShiftLeft => "Shift",
-        ShiftRight => "Right Shift",
+            KeyCode::AltLeft => "Option",
+            KeyCode::AltRight => "Right Option",
+            KeyCode::ControlLeft => "Control",
+            KeyCode::ControlRight => "Right Control",
+            KeyCode::SuperLeft => "Command",
+            KeyCode::SuperRight => "Right Command", // doesn't exist anyway
+            KeyCode::ShiftLeft => "Shift",
+            KeyCode::ShiftRight => "Right Shift",
 
-        Backspace => "Delete",
-        Enter => "Return",
+            KeyCode::Backspace => "Delete",
+            KeyCode::Enter => "Return",
 
-        ArrowDown => "Down",
-        ArrowLeft => "Left",
-        ArrowRight => "Right",
-        ArrowUp => "Up",
-        Delete => "Forward Delete",
+            KeyCode::ArrowDown => "Down",
+            KeyCode::ArrowLeft => "Left",
+            KeyCode::ArrowRight => "Right",
+            KeyCode::ArrowUp => "Up",
+            KeyCode::Delete => "Forward Delete",
 
-        Escape => "Esc",
+            KeyCode::Escape => "Esc",
 
-        other => return format!("{:?}", other),
+            other => return format!("{:?}", other),
+        }
+        .to_string(),
+
+        PhysicalKey::Unidentified(native_key_code) => match native_key_code {
+            NativeKeyCode::Unidentified => "<unknown>".to_string(),
+            NativeKeyCode::Android(sc) => format!("SC{sc}"),
+            NativeKeyCode::MacOS(sc) => format!("SC{sc}"),
+            NativeKeyCode::Windows(sc) => format!("SC{sc}"),
+            NativeKeyCode::Xkb(sc) => format!("SC{sc}"),
+        },
     }
-    .to_owned()
 }
