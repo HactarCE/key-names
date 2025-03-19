@@ -27,5 +27,3 @@ Run `cargo run --example all_keys` to see the key names produced by this library
 ## Contributing
 
 Bugfix PRs welcome! Before investing time & effort into a new feature, it might be good to open an issue to discuss. I made this crate initially for the needs of [Hyperspeedcube](https://github.com/HactarCE/Hyperspeedcube), and I'm open to adding more features if people would find it useful and it's possible to support cross-platform.
-
-Also, if anyone knows how to set up `Cargo.toml` to force-enable the `winit` feature on web, please submit a PR!
